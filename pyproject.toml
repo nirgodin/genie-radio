@@ -9,7 +9,7 @@ readme = "README.md"
 python = ">=3.8,<3.12"
 genie-common = { git = "https://github.com/nirgodin/genie-common.git", rev = "9cea6997a0e271871cf971172a704f4eec2f230f" }  # Must use long hash because poetry export runs into problem without
 spotipyio = {git = "https://github.com/nirgodin/spotipyio.git", rev = "ef9870e2"}
-
+shazamio = ">=0.6.0,<0.7"
 
 [build-system]
 requires = ["poetry-core"]
