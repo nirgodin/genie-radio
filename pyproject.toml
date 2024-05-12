@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "genie-radio"
+version = "0.1.0"
+description = ""
+authors = ["nir.godin <nir.godin@planckresolution.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.12"
+genie-common = { git = "https://github.com/nirgodin/genie-common.git", rev = "9cea6997a0e271871cf971172a704f4eec2f230f" }  # Must use long hash because poetry export runs into problem without
+spotipyio = {git = "https://github.com/nirgodin/spotipyio.git", rev = "ef9870e2"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
