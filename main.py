@@ -1,22 +1,28 @@
 import asyncio
-from tempfile import TemporaryDirectory
+from time import sleep
 
 from aiohttp import ClientSession
-from shazamio import Shazam
+from genie_common.tools import logger
 
-from genie_radio.radio_streamer import RadioStreamer
+from genie_radio.components.component_factory import ComponentFactory
 
 
 async def run():
-    shazam = Shazam()
+    factory = ComponentFactory()
 
-    async with ClientSession() as session:
-        streamer = RadioStreamer(session)
+    async with ClientSession() as client_session:
+        raw_session = factory.spotify.get_spotify_session()
 
-        with TemporaryDirectory() as dir_path:
-            file_path = await streamer.stream(dir_path, "https://glzicylv01.bynetcdn.com/glglz_mp3")
-            out = await shazam.recognize_song(file_path)
-            print('b')
+        async with raw_session as spotify_session:
+            manager = factory.get_playlists_manager(client_session, spotify_session)
+
+            while True:
+                try:
+                    await manager.run()
+                    logger.info("Sleeping Until next round")
+                    sleep(60)
+                except KeyboardInterrupt:
+                    logger.info(f"Program stopped manually. Aborting")
 
 
 if __name__ == '__main__':
