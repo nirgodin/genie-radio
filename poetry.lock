@@ -1235,8 +1235,8 @@ tqdm = ">=4.65,<5.0"
 [package.source]
 type = "git"
 url = "https://github.com/nirgodin/spotipyio.git"
-reference = "ef9870e2"
-resolved_reference = "ef9870e23ba3a91a76e3663cc6ab26699bdf6e9a"
+reference = "5724c272"
+resolved_reference = "5724c27271201c398cdf804c80cf655f28ce84b8"
 
 [[package]]
 name = "tqdm"
@@ -1407,4 +1407,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "003f20005a1f29b1a0ad2fbb221cff67d68e2fecac38ba67d9048d4a8666203d"
+content-hash = "56c376e5777d8091fc90ccad78cbe2ca2ad25f564f2d38d181a83c6497dcb513"
