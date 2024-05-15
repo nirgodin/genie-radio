@@ -9,7 +9,7 @@ class PlaylistUpdater:
     def __init__(self,
                  spotify_client: SpotifyClient,
                  playlist_id: str,
-                 max_items: int = 2,
+                 max_items: int = 100,
                  snapshot_id: Optional[str] = None,
                  playlist_uris: Optional[List[str]] = None):
         self._spotify_client = spotify_client
