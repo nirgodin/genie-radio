@@ -21,11 +21,11 @@ class ComponentFactory:
     @asynccontextmanager
     async def get_playlists_manager(self) -> PlaylistsManager:
         client_session = ClientSession()
-        spotify_session = self.spotify.get_spotify_session()
+        session_creator = self.spotify.get_spotify_session_creator()
+        spotify_session = await session_creator.create()
 
         try:
             await client_session.__aenter__()
-            await spotify_session.__aenter__()
             spotify_client = self.spotify.get_spotify_client(spotify_session)
 
             yield PlaylistsManager(

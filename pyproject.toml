@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
-genie-common = { git = "https://github.com/nirgodin/genie-common.git", rev = "acf5921b098f6055891f0c71e03b585db1b128ef", extras = ["clients"] }  # Must use long hash because poetry export runs into problem without
+genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "8fecdfc2", extras = ["postgres", "redis"]}
 spotipyio = {git = "https://github.com/nirgodin/spotipyio.git", rev = "5724c272"}
 shazamio = ">=0.6.0,<0.7"
 

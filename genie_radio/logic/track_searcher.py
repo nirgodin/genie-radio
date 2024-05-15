@@ -17,7 +17,9 @@ class TrackSearcher:
         recognition_output = await self._shazam.recognize(stream)
         search_item = self._build_search_item(recognition_output)
 
-        if search_item is not None:
+        if search_item is None:
+            logger.info("Was not able to recognized the sampled stream as any track. Skipping")
+        else:
             return await self._search_track(search_item)
 
     @staticmethod

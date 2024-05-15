@@ -1,19 +1,23 @@
+from genie_datastores.redis.operations import get_redis
 from spotipyio import SpotifyClient, EntityMatcher, TrackEntityExtractor
 from spotipyio.logic.authentication.spotify_grant_type import SpotifyGrantType
 from spotipyio.logic.authentication.spotify_session import SpotifySession
 
 from genie_radio.components.environment_factory import EnvironmentFactory
 from genie_radio.logic.artist_entity_extractor import ArtistEntityExtractor
+from genie_radio.logic.spotify_session_creator import SpotifySessionCreator
 
 
 class SpotifyFactory:
     def __init__(self, env: EnvironmentFactory = EnvironmentFactory()):
         self._env = env
 
-    def get_spotify_session(self) -> SpotifySession:
-        return SpotifySession(
-            grant_type=SpotifyGrantType.REFRESH_TOKEN,
-            access_code=self._env.get_refresh_token()
+    def get_spotify_session_creator(self) -> SpotifySessionCreator:
+        return SpotifySessionCreator(
+            redis=get_redis(),
+            client_id=self._env.get_spotify_client_id(),
+            client_secret=self._env.get_spotify_client_secret(),
+            redirect_uri=self._env.get_spotify_redirect_uri()
         )
 
     @staticmethod

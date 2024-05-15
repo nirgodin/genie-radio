@@ -28,7 +28,8 @@ class PlaylistUpdater:
 
             await self._update_playlist(uri)
 
-        logger.info(f"URI `{uri}` is already the newest URI in the playlist. Skipping")
+        else:
+            logger.info(f"URI `{uri}` is already the newest URI in the playlist. Skipping")
 
     async def _initialize_playlist_state(self) -> None:
         logger.info("Initializing playlist state")

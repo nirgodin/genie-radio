@@ -1,4 +1,7 @@
 import asyncio
+from http import HTTPStatus
+
+from aiohttp import ClientResponseError
 
 from genie_radio.components.component_factory import ComponentFactory
 
@@ -6,8 +9,15 @@ from genie_radio.components.component_factory import ComponentFactory
 async def run():
     factory = ComponentFactory()
 
-    async with factory.get_playlists_manager() as manager:
-        await manager.run_forever()
+    try:
+        async with factory.get_playlists_manager() as manager:
+            await manager.run_forever()
+
+    except ClientResponseError as e:
+        if e.status == HTTPStatus.UNAUTHORIZED:
+            return await run()
+
+        raise
 
 
 if __name__ == '__main__':
