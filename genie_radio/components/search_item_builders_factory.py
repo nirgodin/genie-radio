@@ -21,4 +21,4 @@ class SearchItemBuildersFactory:
         return PlainSearchItemBuilder()
 
     def get_translated_artist_builder(self) -> TranslatedArtistSearchItemBuilder:
-        return TranslatedArtistSearchItemBuilder(self._tools.get_google_translate_client())
+        return TranslatedArtistSearchItemBuilder(self._tools.get_translator())

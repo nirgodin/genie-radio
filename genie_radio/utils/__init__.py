@@ -6,6 +6,8 @@ __all__ = [
     # Shazam
     "extract_shazam_artist",
     "extract_shazam_track",
+    "extract_shazam_artist_id",
+    "extract_shazam_track_id",
 
     # Spotify
     "build_search_item",

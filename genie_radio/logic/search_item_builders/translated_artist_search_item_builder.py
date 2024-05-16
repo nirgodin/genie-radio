@@ -1,50 +1,33 @@
-from typing import Optional, List
+from typing import Optional
 
-from genie_common.clients.google import GoogleTranslateClient
-from genie_common.models.google import TranslationResponse
 from genie_common.tools import logger
-from genie_common.utils import contains_any_non_english_character
+from genie_datastores.postgres.models import EntityType
 from spotipyio import SearchItem
 
 from genie_radio.logic.search_item_builders import ISearchItemBuilder
-from genie_radio.utils import extract_shazam_artist, extract_shazam_track, build_search_item
+from genie_radio.tools import Translator
+from genie_radio.utils import extract_shazam_artist, extract_shazam_track, build_search_item, extract_shazam_artist_id
 
 
 class TranslatedArtistSearchItemBuilder(ISearchItemBuilder):
-    def __init__(self, translation_client: GoogleTranslateClient):
-        self._translation_client = translation_client
+    def __init__(self, translator: Translator):
+        self._translator = translator
 
     async def build(self, recognition_output: dict) -> Optional[SearchItem]:
-        translated_artist = await self._translate_artist_name(recognition_output)
+        artist_id = extract_shazam_artist_id(recognition_output)
+
+        if artist_id is not None:
+            return await self._build_item(recognition_output, artist_id)
+
+        logger.warning(f"Was not able to extract Shazam artist id. Skipping `{self.__class__.__name__}` logic")
+
+    async def _build_item(self, recognition_output: dict, artist_id: str) -> Optional[SearchItem]:
+        translated_artist = await self._translator.translate(
+            record_id=artist_id,
+            text=extract_shazam_artist(recognition_output),
+            entity_type=EntityType.ARTIST
+        )
 
         if translated_artist:
             track = extract_shazam_track(recognition_output)
             return build_search_item(artist=translated_artist, track=track)
-
-    async def _translate_artist_name(self, recognition_output: dict) -> Optional[str]:
-        artist = extract_shazam_artist(recognition_output)
-        target_language = self._decide_target_langauge(artist)
-        logger.info(f"Translating artist name `{artist}` to language `{target_language}`")
-        responses = await self._translation_client.translate(
-            texts=[artist],
-            target_language=target_language
-        )
-
-        return self._extract_translation_response(responses, artist)
-
-    @staticmethod
-    def _decide_target_langauge(artist: str) -> str:
-        if contains_any_non_english_character(artist):
-            return "en"
-
-        return "he"
-
-    @staticmethod
-    def _extract_translation_response(responses: List[TranslationResponse], artist: str) -> Optional[str]:
-        if responses:
-            translation = responses[0].translation
-            logger.info(f"Successfully translated `{artist}` to {translation}")
-
-            return translation
-
-        logger.info(f"Translation service did not return any response. Returning None instead")
