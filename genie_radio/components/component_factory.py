@@ -4,8 +4,8 @@ from typing import List
 from aiohttp import ClientSession
 from shazamio import Shazam
 from spotipyio import SpotifyClient
-from spotipyio.logic.authentication.spotify_session import SpotifySession
 
+from genie_radio.components.search_item_builders_factory import SearchItemBuildersFactory
 from genie_radio.components.spotify_factory import SpotifyFactory
 from genie_radio.logic.playlist_updater import PlaylistUpdater
 from genie_radio.logic.playlists_manager import PlaylistsManager
@@ -15,8 +15,11 @@ from genie_radio.logic.track_searcher import TrackSearcher
 
 
 class ComponentFactory:
-    def __init__(self, spotify: SpotifyFactory = SpotifyFactory()):
+    def __init__(self,
+                 spotify: SpotifyFactory = SpotifyFactory(),
+                 search_item_builder: SearchItemBuildersFactory = SearchItemBuildersFactory()):
         self.spotify = spotify
+        self.search_item_builder = search_item_builder
 
     @asynccontextmanager
     async def get_playlists_manager(self) -> PlaylistsManager:
@@ -42,7 +45,8 @@ class ComponentFactory:
         return TrackSearcher(
             shazam=Shazam("EN"),
             spotify_client=spotify_client,
-            entity_matcher=self.spotify.get_entity_matcher()
+            entity_matcher=self.spotify.get_entity_matcher(),
+            prioritized_search_item_builders=self.search_item_builder.get_prioritized_builders()
         )
 
     @staticmethod
