@@ -2,41 +2,21 @@ from typing import Optional, List
 
 from genie_common.tools import logger
 from genie_common.utils import safe_nested_get
-from shazamio import Shazam
-from spotipyio import SpotifyClient, SearchItem, SearchItemMetadata, SpotifySearchType, SearchItemFilters, \
-    EntityMatcher, MatchingEntity
+from spotipyio import SpotifyClient, SearchItem, EntityMatcher, MatchingEntity
 
 from genie_radio.logic.search_item_builders import ISearchItemBuilder
-from genie_radio.utils import extract_shazam_artist, extract_shazam_track
 
 
 class TrackSearcher:
     def __init__(self,
-                 shazam: Shazam,
                  prioritized_search_item_builders: List[ISearchItemBuilder],
                  spotify_client: SpotifyClient,
                  entity_matcher: EntityMatcher):
-        self._shazam = shazam
         self._prioritized_search_item_builders = prioritized_search_item_builders
         self._spotify_client = spotify_client
         self._entity_matcher = entity_matcher
 
-    async def search(self, stream: bytes) -> Optional[str]:
-        recognition_output = await self._shazam.recognize(stream)
-
-        if self._is_successful_recognition(recognition_output):
-            return await self._match_recognized_track(recognition_output)
-
-        logger.info("Shazam failed to recognized streamed track sample. Skipping")
-
-    @staticmethod
-    def _is_successful_recognition(recognition_output: dict) -> bool:
-        artist = extract_shazam_artist(recognition_output)
-        track = extract_shazam_track(recognition_output)
-
-        return artist is not None and track is not None
-
-    async def _match_recognized_track(self, recognition_output: dict) -> Optional[str]:
+    async def search(self, recognition_output: dict) -> Optional[str]:
         for builder in self._prioritized_search_item_builders:
             uri = await self._apply_single_builder(builder, recognition_output)
 
