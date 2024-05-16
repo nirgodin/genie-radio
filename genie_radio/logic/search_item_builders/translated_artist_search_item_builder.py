@@ -1,13 +1,13 @@
 from typing import Optional, List
 
-from genie_common.clients.google.google_translate_client import GoogleTranslateClient
+from genie_common.clients.google import GoogleTranslateClient
 from genie_common.models.google import TranslationResponse
 from genie_common.tools import logger
+from genie_common.utils import contains_any_non_english_character
 from spotipyio import SearchItem
 
 from genie_radio.logic.search_item_builders import ISearchItemBuilder
-from genie_radio.utils import extract_shazam_artist, contains_any_non_ascii_or_punctuation_char, extract_shazam_track, \
-    build_search_item
+from genie_radio.utils import extract_shazam_artist, extract_shazam_track, build_search_item
 
 
 class TranslatedArtistSearchItemBuilder(ISearchItemBuilder):
@@ -34,7 +34,7 @@ class TranslatedArtistSearchItemBuilder(ISearchItemBuilder):
 
     @staticmethod
     def _decide_target_langauge(artist: str) -> str:
-        if contains_any_non_ascii_or_punctuation_char(artist):
+        if contains_any_non_english_character(artist):
             return "en"
 
         return "he"

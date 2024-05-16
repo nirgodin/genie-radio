@@ -1,4 +1,4 @@
-from genie_common.clients.google.google_translate_client import GoogleTranslateClient
+from genie_common.clients.google import GoogleTranslateClient
 
 
 class ToolsFactory:
