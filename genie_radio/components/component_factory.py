@@ -92,15 +92,14 @@ class ComponentFactory:
                     playlist_id="4sTLFJN8Kv4R6zqKibmtFG"
                 )
             ),
-            # TODO: Add KZ_RADIO to SpotifyStation enum
-            # StationConfig(
-            #     name=SpotifyStation.KZ_RADIO,
-            #     url="https://kzradio.mediacast.co.il/kzradio_live/kzradio/icecast.audio",
-            #     updater=PlaylistUpdater(
-            #         spotify_client=spotify_client,
-            #         playlist_id="14dzmMSk7h9MxelRjwXZRj"
-            #     )
-            # ),
+            StationConfig(
+                name=SpotifyStation.KZ_RADIO,
+                url="https://kzradio.mediacast.co.il/kzradio_live/kzradio/icecast.audio",
+                updater=PlaylistUpdater(
+                    spotify_client=spotify_client,
+                    playlist_id="14dzmMSk7h9MxelRjwXZRj"
+                )
+            ),
             # TODO: Fix ffmpeg problem
             # StationConfig(
             #     name=SpotifyStation.ECO_99,
