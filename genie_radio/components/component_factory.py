@@ -33,6 +33,7 @@ class ComponentFactory:
 
             yield PlaylistsManager(
                 radio_streamer=self.get_radio_streamer(client_session),
+                shazam=Shazam("EN"),
                 track_searcher=self.get_track_searcher(spotify_client),
                 stations=self.get_stations(spotify_client)
             )
@@ -43,7 +44,6 @@ class ComponentFactory:
 
     def get_track_searcher(self, spotify_client: SpotifyClient) -> TrackSearcher:
         return TrackSearcher(
-            shazam=Shazam("EN"),
             spotify_client=spotify_client,
             entity_matcher=self.spotify.get_entity_matcher(),
             prioritized_search_item_builders=self.search_item_builder.get_prioritized_builders()
@@ -57,6 +57,7 @@ class ComponentFactory:
     def get_stations(spotify_client: SpotifyClient) -> List[StationConfig]:
         return [
             StationConfig(
+                name="glglz",
                 url="https://glzicylv01.bynetcdn.com/glglz_mp3",
                 updater=PlaylistUpdater(
                     spotify_client=spotify_client,

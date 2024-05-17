@@ -31,25 +31,20 @@ class TrackSearcher:
         search_item = await builder.build(recognition_output)
 
         if search_item is not None:
-            item_name = self._to_item_name(search_item)
-            logger.info(f"Search item `{item_name}` built using `{builder_name}`")
+            logger.info(f"Search item `{search_item.text}` built using `{builder_name}`")
             return await self._search_track(search_item)
 
         logger.info(f"Builder `{builder_name}` did not return any search item. Skipping")
 
     async def _search_track(self, search_item: SearchItem) -> Optional[str]:
         search_result = await self._spotify_client.search.run_single(search_item)
-        entity = MatchingEntity(
-            track=search_item.filters.track,
-            artist=search_item.filters.artist
-        )
+        entity = self._build_matching_entity(search_item)
         matching_candidate = self._match_candidates(search_result, entity)
 
         if matching_candidate:
             return matching_candidate
 
-        item_name = self._to_item_name(search_item)
-        logger.info(f"Did not find any track that matches `{item_name}`. Skipping")
+        logger.info(f"Did not find any track that matches `{search_item.text}`. Skipping")
 
     def _match_candidates(self, search_result: dict, entity: MatchingEntity) -> Optional[str]:
         candidates = safe_nested_get(search_result, ["tracks", "items"])
@@ -70,6 +65,35 @@ class TrackSearcher:
 
         logger.info(f"Failed matching candidate against entity. Score {score} is below threshold")  # TODO: Add candidate name for better logging
 
+    def _build_matching_entity(self, search_item: SearchItem) -> MatchingEntity:
+        if search_item.filters.track and search_item.filters.artist:
+            return MatchingEntity(
+                track=search_item.filters.track,
+                artist=search_item.filters.artist
+            )
+
+        if search_item.text:
+            return self._build_matching_entity_from_text(search_item.text)
+
+        raise ValueError("Invalid search item. Was not able to extract track and artist names")
+
     @staticmethod
-    def _to_item_name(search_item: SearchItem) -> str:
-        return f"{search_item.filters.artist} - {search_item.filters.track}"
+    def _build_matching_entity_from_text(text: str) -> MatchingEntity:
+        split_text = text.split(" - ")
+        split_text_length = len(split_text)
+        artist = split_text[0]
+
+        if split_text_length < 2:
+            logger.warning(f"Text `{text}` is invalid and has no track name. Using empty string as track name")
+            track = ""
+
+        elif split_text_length == 2:
+            track = split_text[1]
+
+        else:
+            track = " - ".join(split_text[1:])
+
+        return MatchingEntity(
+            artist=artist,
+            track=track
+        )

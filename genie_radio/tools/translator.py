@@ -54,6 +54,7 @@ class Translator:
         first_response = self._extract_first_translation_response(responses, text)
 
         if first_response is not None:
+            first_response.translation = first_response.translation.replace("&amp;", "&")
             await self._store_translation_in_cache(
                 record_id=record_id,
                 text=text,

@@ -3,10 +3,7 @@ from spotipyio import SearchItem, SearchItemFilters, SearchItemMetadata, Spotify
 
 def build_search_item(artist: str, track: str) -> SearchItem:
     return SearchItem(
-        filters=SearchItemFilters(
-            track=track,
-            artist=artist
-        ),
+        text=f"{artist} - {track}",
         metadata=SearchItemMetadata(
             search_types=[SpotifySearchType.TRACK],
             quote=False
