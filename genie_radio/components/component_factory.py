@@ -39,7 +39,7 @@ class ComponentFactory:
                 shazam=Shazam("EN"),
                 track_searcher=self.get_track_searcher(spotify_client),
                 stations=stations,
-                pool_executor=AioPoolExecutor(pool_size=len(stations))
+                pool_executor=AioPoolExecutor(pool_size=len(stations), validate_results=False)
             )
 
         finally:

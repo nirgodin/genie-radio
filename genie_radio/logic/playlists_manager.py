@@ -1,6 +1,8 @@
+from http import HTTPStatus
 from time import sleep
-from typing import List
+from typing import List, Any
 
+from aiohttp import ClientResponseError
 from genie_common.tools import logger, AioPoolExecutor
 from shazamio import Shazam
 
@@ -25,20 +27,22 @@ class PlaylistsManager:
 
     async def run_forever(self) -> None:
         while True:
-            try:
-                await self.run()
-                logger.info("Sleeping Until next round")
-                sleep(60)
-
-            except KeyboardInterrupt:
-                logger.info(f"Program stopped manually. Aborting")
+            await self.run()
+            logger.info("Sleeping Until next round")
+            sleep(60)
 
     async def run(self) -> None:
-        await self._pool_executor.run(
+        results = await self._pool_executor.run(
             iterable=self._stations,
             func=self._run_single_station_wrapper,
             expected_type=type(None)
         )
+
+        if all(self._is_unauthorized(result) for result in results):
+            raise PermissionError
+
+        if all(isinstance(result, Exception) for result in results):
+            raise RuntimeError("All requests ran into unknown exception")
 
     async def _run_single_station_wrapper(self, station: StationConfig) -> None:
         try:
@@ -46,6 +50,7 @@ class PlaylistsManager:
 
         except:
             logger.exception(f"Received exception from station `{station.name}` process")
+            raise
 
     async def _run_single_station(self, station: StationConfig) -> None:
         logger.info(f"Running station `{station.name}` recognition")
@@ -83,3 +88,10 @@ class PlaylistsManager:
 
         if uri is not None:
             await station.updater.update(uri)
+
+    @staticmethod
+    def _is_unauthorized(result: Any) -> bool:
+        if isinstance(result, ClientResponseError):
+            return result.status == HTTPStatus.UNAUTHORIZED
+
+        return False

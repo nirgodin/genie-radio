@@ -1,23 +1,27 @@
 import asyncio
-from http import HTTPStatus
 
-from aiohttp import ClientResponseError
+from genie_common.tools import logger
 
 from genie_radio.components.component_factory import ComponentFactory
 
 
-async def run():
+async def run(exceptions_count: int = 0):
+    if exceptions_count >= 3:
+        raise RuntimeError(f"Exceptions count exceeded max allowed exceptions. Aborting")
+
     factory = ComponentFactory()
 
     try:
         async with factory.get_playlists_manager() as manager:
             await manager.run_forever()
 
-    except ClientResponseError as e:
-        if e.status == HTTPStatus.UNAUTHORIZED:
-            return await run()
+    except PermissionError:
+        logger.info("Session authorization expired. Re-creating session")
+        return await run(exceptions_count=0)
 
-        raise
+    except Exception:
+        logger.exception("Encountered exception! Retrying")
+        return await run(exceptions_count + 1)
 
 
 if __name__ == '__main__':
