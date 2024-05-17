@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 from typing import List
 
 from aiohttp import ClientSession
+from genie_common.tools import AioPoolExecutor
+from genie_datastores.postgres.models import SpotifyStation
 from shazamio import Shazam
 from spotipyio import SpotifyClient
 
@@ -30,12 +32,14 @@ class ComponentFactory:
         try:
             await client_session.__aenter__()
             spotify_client = self.spotify.get_spotify_client(spotify_session)
+            stations = self.get_stations(spotify_client)
 
             yield PlaylistsManager(
                 radio_streamer=self.get_radio_streamer(client_session),
                 shazam=Shazam("EN"),
                 track_searcher=self.get_track_searcher(spotify_client),
-                stations=self.get_stations(spotify_client)
+                stations=stations,
+                pool_executor=AioPoolExecutor(pool_size=len(stations))
             )
 
         finally:
@@ -57,11 +61,53 @@ class ComponentFactory:
     def get_stations(spotify_client: SpotifyClient) -> List[StationConfig]:
         return [
             StationConfig(
-                name="glglz",
-                url="https://glzicylv01.bynetcdn.com/glglz_mp3",
+                name=SpotifyStation.GLGLZ,
+                url="https://glzwizzlv.bynetcdn.com/glglz_mp3",
                 updater=PlaylistUpdater(
                     spotify_client=spotify_client,
-                    playlist_id="1t0YzRn0CNKjBWBZUQX0Kz"
+                    playlist_id="2KYmOoAcygHFPWmrSlGpHo"
                 )
-            )
+            ),
+            StationConfig(
+                name=SpotifyStation.KAN_GIMEL,
+                url="https://23603.live.streamtheworld.com/KAN_GIMMEL.mp3",
+                updater=PlaylistUpdater(
+                    spotify_client=spotify_client,
+                    playlist_id="3w2tquPLXoq6pEQUzLYG3J"
+                )
+            ),
+            StationConfig(
+                name=SpotifyStation.KAN_88,
+                url="https://27343.live.streamtheworld.com/KAN_88.mp3",
+                updater=PlaylistUpdater(
+                    spotify_client=spotify_client,
+                    playlist_id="07xAi6MxL60MOdoDwmAL4k"
+                )
+            ),
+            StationConfig(
+                name=SpotifyStation.FM_103,
+                url="https://cdn.cybercdn.live/103FM/Live/icecast.audio",
+                updater=PlaylistUpdater(
+                    spotify_client=spotify_client,
+                    playlist_id="4sTLFJN8Kv4R6zqKibmtFG"
+                )
+            ),
+            # TODO: Add KZ_RADIO to SpotifyStation enum
+            # StationConfig(
+            #     name=SpotifyStation.KZ_RADIO,
+            #     url="https://kzradio.mediacast.co.il/kzradio_live/kzradio/icecast.audio",
+            #     updater=PlaylistUpdater(
+            #         spotify_client=spotify_client,
+            #         playlist_id="14dzmMSk7h9MxelRjwXZRj"
+            #     )
+            # ),
+            # TODO: Fix ffmpeg problem
+            # StationConfig(
+            #     name=SpotifyStation.ECO_99,
+            #     url="https://eco01.mediacast.co.il/ecolive/99fm_aac/icecast.audio",
+            #     updater=PlaylistUpdater(
+            #         spotify_client=spotify_client,
+            #         playlist_id="1LgY4vKWZl3Uw2yWNd3GKX"
+            #     )
+            # ),
         ]

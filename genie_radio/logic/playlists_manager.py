@@ -1,7 +1,7 @@
 from time import sleep
 from typing import List
 
-from genie_common.tools import logger
+from genie_common.tools import logger, AioPoolExecutor
 from shazamio import Shazam
 
 from genie_radio.logic.radio_streamer import RadioStreamer
@@ -15,11 +15,13 @@ class PlaylistsManager:
                  radio_streamer: RadioStreamer,
                  shazam: Shazam,
                  track_searcher: TrackSearcher,
-                 stations: List[StationConfig]):
+                 stations: List[StationConfig],
+                 pool_executor: AioPoolExecutor):
         self._radio_streamer = radio_streamer
         self._shazam = shazam
         self._track_searcher = track_searcher
         self._stations = stations
+        self._pool_executor = pool_executor
 
     async def run_forever(self) -> None:
         while True:
@@ -32,18 +34,28 @@ class PlaylistsManager:
                 logger.info(f"Program stopped manually. Aborting")
 
     async def run(self) -> None:
-        for station in self._stations:
-            logger.info(f"Running station `{station.name}` recognition")
+        await self._pool_executor.run(
+            iterable=self._stations,
+            func=self._run_single_station_wrapper,
+            expected_type=type(None)
+        )
+
+    async def _run_single_station_wrapper(self, station: StationConfig) -> None:
+        try:
             await self._run_single_station(station)
 
+        except:
+            logger.exception(f"Received exception from station `{station.name}` process")
+
     async def _run_single_station(self, station: StationConfig) -> None:
-        stream = await self._radio_streamer.stream(station.url)
+        logger.info(f"Running station `{station.name}` recognition")
+        stream = await self._radio_streamer.stream(station)
         recognition_output = await self._shazam.recognize(stream)
 
         if self._is_successful_recognition(recognition_output):
             return await self._match_and_add_recognized_track(recognition_output, station)
 
-        logger.info("Shazam failed to recognized streamed track sample. Skipping")
+        logger.info(f"Shazam failed to recognized station `{station.name}` streamed track sample. Skipping")
 
     @staticmethod
     def _is_successful_recognition(recognition_output: dict) -> bool:
@@ -65,7 +77,7 @@ class PlaylistsManager:
             logger.info(f"track_id `{track_id}` was already processed. Skipping")
 
     async def _add_track_to_playlist(self, recognition_output: dict, station: StationConfig, track_id: str) -> None:
-        logger.info(f"Recognized track_id `{track_id}` as new track. Starting matching process")
+        logger.info(f"Recognized track `{track_id}` played on `{station.name}` as new track. Starting matching process")
         station.last_track_id = track_id
         uri = await self._track_searcher.search(recognition_output)
 
