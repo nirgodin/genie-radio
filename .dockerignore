@@ -1,0 +1,20 @@
+Dockerfile
+*.pyo
+*.pyd
+__pycache__
+.pytest_cache
+.gitignore
+
+# Python
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/playlists-creator.iml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
+/.DS_Store
+
+# Env
+.env
+service_account_secrets.json
