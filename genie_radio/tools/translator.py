@@ -3,11 +3,13 @@ from typing import Optional, List
 from genie_common.clients.google import GoogleTranslateClient
 from genie_common.models.google import TranslationResponse
 from genie_common.tools import logger
-from genie_common.utils import contains_any_non_english_character, contains_any_alpha_character
+from genie_common.utils import contains_any_alpha_character
 from genie_datastores.postgres.models import Translation, DataSource, EntityType
 from genie_datastores.postgres.operations import execute_query, insert_records
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncEngine
+
+from genie_radio.utils import decide_target_language
 
 
 class Translator:
@@ -15,7 +17,11 @@ class Translator:
         self._translation_client = translation_client
         self._db_engine = db_engine
 
-    async def translate(self, record_id: str, text: str, entity_type: EntityType) -> Optional[str]:
+    async def translate(self,
+                        record_id: str,
+                        text: str,
+                        entity_type: EntityType,
+                        target_language: Optional[str] = None) -> Optional[str]:
         logger.info(f"Translating record id `{record_id}` with value `{text}`")
         translation = await self._retrieve_cached_translation(record_id)
 
@@ -25,7 +31,8 @@ class Translator:
         return await self._request_translation(
             record_id=record_id,
             text=text,
-            entity_type=entity_type
+            entity_type=entity_type,
+            target_language=target_language
         )
 
     async def _retrieve_cached_translation(self, record_id: str) -> Optional[str]:
@@ -44,12 +51,16 @@ class Translator:
         logger.info(f"Found record id `{record_id}` translation in cache")
         return translation
 
-    async def _request_translation(self, record_id: str, text: str, entity_type: EntityType) -> Optional[str]:
-        target_language = "en" if contains_any_non_english_character(text) else "he"
-        logger.info(f"Sending translation request to language `{target_language}` for text `{text}`")
+    async def _request_translation(self,
+                                   record_id: str,
+                                   text: str,
+                                   entity_type: EntityType,
+                                   target_language: Optional[str]) -> Optional[str]:
+        language = self._determine_target_language(target_language, text)
+        logger.info(f"Sending translation request to language `{language}` for text `{text}`")
         responses = await self._translation_client.translate(
             texts=[text],
-            target_language=target_language
+            target_language=language
         )
         first_response = self._extract_first_translation_response(responses, text)
 
@@ -63,6 +74,13 @@ class Translator:
             )
 
         return first_response.translation
+
+    @staticmethod
+    def _determine_target_language(target_language: Optional[str], text: str) -> str:
+        if target_language is not None:
+            return target_language
+
+        return decide_target_language(text)
 
     @staticmethod
     def _extract_first_translation_response(responses: List[TranslationResponse],

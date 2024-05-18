@@ -7,7 +7,7 @@ from spotipyio import SearchItem
 from genie_radio.logic.search_item_builders import ISearchItemBuilder
 from genie_radio.tools import Translator
 from genie_radio.utils import extract_shazam_artist, extract_shazam_track, build_search_item, extract_shazam_track_id, \
-    extract_shazam_artist_id
+    extract_shazam_artist_id, decide_target_language
 
 
 class TranslatedSongSearchItemBuilder(ISearchItemBuilder):
@@ -28,10 +28,17 @@ class TranslatedSongSearchItemBuilder(ISearchItemBuilder):
         logger.warning(f"Was not able to extract Shazam track or artist id. Skipping `{self.__class__.__name__}` logic")
 
     async def _build_item(self, recognition_output: dict, track_id: str, artist_id: str) -> Optional[SearchItem]:
+        track_name = extract_shazam_track(recognition_output)
+        track_target_language = decide_target_language(track_name)
+
+        if track_target_language != "he":
+            return
+
         translated_track = await self._translator.translate(
             record_id=track_id,
-            text=extract_shazam_track(recognition_output),
-            entity_type=EntityType.TRACK
+            text=track_name,
+            entity_type=EntityType.TRACK,
+            target_language=track_target_language
         )
         translated_artist = await self._translator.translate(
             record_id=artist_id,
