@@ -38,7 +38,7 @@ class PlaylistsManager:
             expected_type=type(None)
         )
 
-        if all(self._is_unauthorized(result) for result in results):
+        if any(self._is_unauthorized(result) for result in results):
             raise PermissionError
 
         if all(isinstance(result, Exception) for result in results):
