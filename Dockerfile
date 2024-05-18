@@ -12,7 +12,8 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY . ./
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git
+    git \
+    ffmpeg
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=requirements-stage /tmp/requirements.txt requirements.txt

@@ -100,13 +100,12 @@ class ComponentFactory:
                     playlist_id="14dzmMSk7h9MxelRjwXZRj"
                 )
             ),
-            # TODO: Fix ffmpeg problem
-            # StationConfig(
-            #     name=SpotifyStation.ECO_99,
-            #     url="https://eco01.mediacast.co.il/ecolive/99fm_aac/icecast.audio",
-            #     updater=PlaylistUpdater(
-            #         spotify_client=spotify_client,
-            #         playlist_id="1LgY4vKWZl3Uw2yWNd3GKX"
-            #     )
-            # ),
+            StationConfig(
+                name=SpotifyStation.ECO_99,
+                url="https://eco01.mediacast.co.il/ecolive/99fm_aac/icecast.audio",
+                updater=PlaylistUpdater(
+                    spotify_client=spotify_client,
+                    playlist_id="1LgY4vKWZl3Uw2yWNd3GKX"
+                )
+            ),
         ]

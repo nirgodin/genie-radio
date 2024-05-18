@@ -10,6 +10,7 @@ python = ">=3.8,<3.12"
 genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "eb7d9025", extras = ["postgres", "redis"]}
 spotipyio = {git = "https://github.com/nirgodin/spotipyio.git", rev = "5724c272"}
 shazamio = ">=0.6.0,<0.7"
+ffmpeg = ">=1.4,<1.5"
 
 [build-system]
 requires = ["poetry-core"]
