@@ -1,10 +1,9 @@
 from genie_datastores.redis.operations import get_redis
 from spotipyio import SpotifyClient, EntityMatcher, TrackEntityExtractor
-from spotipyio.logic.authentication.spotify_grant_type import SpotifyGrantType
 from spotipyio.logic.authentication.spotify_session import SpotifySession
 
 from genie_radio.components.environment_factory import EnvironmentFactory
-from genie_radio.logic.artist_entity_extractor import ArtistEntityExtractor
+from spotipyio import TrackSearchResultArtistEntityExtractor
 from genie_radio.logic.spotify_session_creator import SpotifySessionCreator
 
 
@@ -26,5 +25,5 @@ class SpotifyFactory:
 
     @staticmethod
     def get_entity_matcher() -> EntityMatcher:
-        extractors = {TrackEntityExtractor(): 0.65, ArtistEntityExtractor(): 0.35}
+        extractors = {TrackEntityExtractor(): 0.65, TrackSearchResultArtistEntityExtractor(): 0.35}
         return EntityMatcher(extractors=extractors)
