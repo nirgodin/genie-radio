@@ -101,7 +101,7 @@ class Translator:
         logger.info(f"Inserting record id `{record_id}` translation to cache")
         entity_source = self._detect_entity_source(record_id)
         record = Translation(
-            id=record_id,
+            entity_id=record_id,
             entity_source=entity_source,
             entity_type=entity_type,
             text=text,
