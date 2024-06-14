@@ -53,7 +53,7 @@ class PlaylistUpdater:
         if not self._playlist_uris:
             return True
 
-        return uri != self._playlist_uris[0]
+        return uri not in self._playlist_uris[-5:]
 
     async def _update_playlist(self, uri: str) -> None:
         logger.info(f"Adding newest uri `{uri}` to playlist `{self._playlist_id}`")
