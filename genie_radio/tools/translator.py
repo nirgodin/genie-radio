@@ -39,7 +39,7 @@ class Translator:
         logger.info(f"Retrieving record id `{record_id}` translation from cache")
         query = (
             select(Translation.translation)
-            .where(Translation.id == record_id)
+            .where(Translation.entity_id == record_id)
             .limit(1)
         )
         query_result = await execute_query(engine=self._db_engine, query=query)
