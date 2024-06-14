@@ -26,6 +26,7 @@ class Translator:
         translation = await self._retrieve_cached_translation(record_id)
 
         if translation is not None:
+            logger.info(f"Found record id `{record_id}` translation in cache")
             return translation
 
         return await self._request_translation(
@@ -48,7 +49,6 @@ class Translator:
         if translation is None:
             logger.info(f"Did not find record id `{record_id}` in translations cache")
 
-        logger.info(f"Found record id `{record_id}` translation in cache")
         return translation
 
     async def _request_translation(self,
