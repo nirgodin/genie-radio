@@ -7,10 +7,20 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
-genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "836851a0", extras = ["postgres", "redis"]}
+genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "bd3f5ffd", extras = ["postgres", "redis"]}
 spotipyio = {git = "https://github.com/nirgodin/spotipyio.git", rev = "25585d2e"}
 shazamio = ">=0.6.0,<0.7"
 ffmpeg = ">=1.4,<1.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0.2,<9.0"
+genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "bd3f5ffd", extras = ["postgres-testing"]}
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+markers = ["asyncio: mark a test as an asyncio coroutine"]
+addopts = "--asyncio-mode=auto"
 
 [build-system]
 requires = ["poetry-core"]
