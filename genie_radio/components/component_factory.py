@@ -1,8 +1,10 @@
+import os
 from contextlib import asynccontextmanager
-from typing import List
+from typing import List, Optional
 
 from aiohttp import ClientSession
 from genie_common.tools import AioPoolExecutor
+from genie_common.utils import env_var_to_bool
 from genie_datastores.postgres.models import SpotifyStation
 from shazamio import Shazam
 from spotipyio import SpotifyClient
@@ -13,6 +15,7 @@ from genie_radio.logic.playlist_updater import PlaylistUpdater
 from genie_radio.logic.playlists_manager import PlaylistsManager
 from genie_radio.logic.radio_streamer import RadioStreamer
 from genie_radio.logic.station_config import StationConfig
+from genie_radio.logic.streams_archiver import StreamsArchiver
 from genie_radio.logic.track_searcher import TrackSearcher
 
 
@@ -53,9 +56,16 @@ class ComponentFactory:
             prioritized_search_item_builders=self.search_item_builder.get_prioritized_builders()
         )
 
+    def get_radio_streamer(self, session: ClientSession) -> RadioStreamer:
+        return RadioStreamer(
+            session=session,
+            streams_archiver=self.get_streams_archiver()
+        )
+
     @staticmethod
-    def get_radio_streamer(session: ClientSession) -> RadioStreamer:
-        return RadioStreamer(session)
+    def get_streams_archiver() -> Optional[StreamsArchiver]:
+        if env_var_to_bool("SHOULD_ARCHIVE_STREAMS"):
+            return StreamsArchiver(os.environ["STREAMS_ARCHIVER_BASE_DIR"])
 
     @staticmethod
     def get_stations(spotify_client: SpotifyClient) -> List[StationConfig]:
