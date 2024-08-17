@@ -4,7 +4,8 @@ from _pytest.fixtures import fixture
 from genie_common.clients.google import GoogleTranslateClient
 from genie_common.models.google import TranslationResponse
 from genie_common.utils import random_alphanumeric_string, random_enum_value
-from genie_datastores.postgres.models import Translation, EntityType
+from genie_datastores.postgres.models import Translation
+from genie_datastores.models import EntityType
 from genie_datastores.postgres.operations import insert_records, execute_query
 from genie_datastores.testing.postgres import postgres_session, PostgresMockFactory
 from sqlalchemy import select

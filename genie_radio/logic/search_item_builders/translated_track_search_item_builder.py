@@ -1,7 +1,7 @@
 from typing import Optional
 
 from genie_common.tools import logger
-from genie_datastores.postgres.models import EntityType
+from genie_datastores.models import EntityType
 from spotipyio import SearchItem
 
 from genie_radio.logic.search_item_builders import ISearchItemBuilder
