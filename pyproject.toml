@@ -7,15 +7,15 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
-genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "daccc93", extras = ["postgres", "redis"]}
-spotipyio = {git = "https://github.com/nirgodin/spotipyio.git", rev = "d1fc6d4a"}
-#shazamio = ">=0.6.0,<0.7"
+genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "4a7730dd", extras = ["postgres", "redis"]}
+spotipyio = {git = "https://github.com/nirgodin/spotipyio.git", rev = "1831c79a"}
+shazamio = ">=0.6.0,<0.7"
 ffmpeg = ">=1.4,<1.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0.2,<9.0"
 pytest-asyncio = ">=0.21.1,<0.22"
-genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "daccc93", extras = ["postgres-testing"]}
+genie-datastores = { git = "https://github.com/nirgodin/genie-datastores.git", rev = "4a7730dd", extras = ["postgres-testing"]}
 
 [tool.pytest.ini_options]
 minversion = "8.0"
