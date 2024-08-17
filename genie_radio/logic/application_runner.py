@@ -3,9 +3,8 @@ from typing import Optional, List
 
 from aiohttp import ClientSession
 from genie_common.tools import logger
-from genie_common.tools.email_sender import EmailSender
+from genie_common.tools import EmailSender
 
-from genie_radio.components.component_factory import ComponentFactory
 from genie_radio.logic.playlists_manager import PlaylistsManager
 from genie_radio.logic.spotify_session_creator import SpotifySessionCreator
 from genie_radio.models import ApplicationException
