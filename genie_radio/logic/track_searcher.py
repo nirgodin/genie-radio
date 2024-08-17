@@ -37,7 +37,7 @@ class TrackSearcher:
         logger.info(f"Builder `{builder_name}` did not return any search item. Skipping")
 
     async def _search_track(self, search_item: SearchItem) -> Optional[str]:
-        search_result = await self._spotify_client.search.run_single(search_item)
+        search_result = await self._spotify_client.search.search_item.run_single(search_item)
         entity = self._build_matching_entity(search_item)
         matching_candidate = self._match_candidates(search_result, entity)
 
