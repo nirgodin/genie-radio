@@ -1,9 +1,8 @@
 import os
-from contextlib import asynccontextmanager
 from typing import List, Optional
 
 from aiohttp import ClientSession
-from genie_common.tools import AioPoolExecutor
+from genie_common.tools import AioPoolExecutor, EmailSender
 from genie_common.utils import env_var_to_bool
 from genie_datastores.postgres.models import SpotifyStation
 from shazamio import Shazam
@@ -11,6 +10,7 @@ from spotipyio import SpotifyClient
 
 from genie_radio.components.search_item_builders_factory import SearchItemBuildersFactory
 from genie_radio.components.spotify_factory import SpotifyFactory
+from genie_radio.logic.application_runner import ApplicationRunner
 from genie_radio.logic.playlist_updater import PlaylistUpdater
 from genie_radio.logic.playlists_manager import PlaylistsManager
 from genie_radio.logic.radio_streamer import RadioStreamer
@@ -26,28 +26,34 @@ class ComponentFactory:
         self.spotify = spotify
         self.search_item_builder = search_item_builder
 
-    @asynccontextmanager
-    async def get_playlists_manager(self) -> PlaylistsManager:
-        client_session = ClientSession()
+    async def get_application_runner(self, client_session: ClientSession) -> ApplicationRunner:
+        playlists_manager = await self.get_playlists_manager(client_session)
+        return ApplicationRunner(
+            email_sender=self.get_email_sender(),
+            playlists_manager=playlists_manager
+        )
+
+    @staticmethod
+    def get_email_sender() -> EmailSender:
+        return EmailSender(
+            user=os.environ["EMAIL_USER"],
+            password=os.environ["EMAIL_PASSWORD"]
+        )
+
+    async def get_playlists_manager(self, client_session: ClientSession) -> PlaylistsManager:
         session_creator = self.spotify.get_spotify_session_creator()
         spotify_session = await session_creator.create()
+        spotify_client = self.spotify.get_spotify_client(spotify_session)
+        stations = self.get_stations(spotify_client)
 
-        try:
-            await client_session.__aenter__()
-            spotify_client = self.spotify.get_spotify_client(spotify_session)
-            stations = self.get_stations(spotify_client)
-
-            yield PlaylistsManager(
-                radio_streamer=self.get_radio_streamer(client_session),
-                shazam=Shazam("EN"),
-                track_searcher=self.get_track_searcher(spotify_client),
-                stations=stations,
-                pool_executor=AioPoolExecutor(pool_size=len(stations), validate_results=False)
-            )
-
-        finally:
-            await client_session.__aexit__(None, None, None)
-            await spotify_session.__aexit__(None, None, None)
+        return PlaylistsManager(
+            radio_streamer=self.get_radio_streamer(client_session),
+            shazam=Shazam("EN"),
+            track_searcher=self.get_track_searcher(spotify_client),
+            stations=stations,
+            pool_executor=AioPoolExecutor(pool_size=len(stations), validate_results=False),
+            session_creator=session_creator
+        )
 
     def get_track_searcher(self, spotify_client: SpotifyClient) -> TrackSearcher:
         return TrackSearcher(
