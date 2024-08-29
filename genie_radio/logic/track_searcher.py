@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from genie_common.tools import logger
 from genie_common.utils import safe_nested_get
-from spotipyio import SpotifyClient, SearchItem, EntityMatcher, MatchingEntity, SpotifySession
+from spotipyio import SpotifyClient, SearchItem, EntityMatcher, MatchingEntity
 
 from genie_radio.logic.search_item_builders import ISearchItemBuilder
 
@@ -25,8 +25,8 @@ class TrackSearcher:
 
         logger.info("Failed to match recognized track using any search item builder. Skipping")
 
-    def refresh_session(self, session: SpotifySession) -> None:
-        self._spotify_client = self._spotify_client.create(session)
+    def refresh_session(self) -> None:
+        self._spotify_client.session.refresh()
 
     async def _apply_single_builder(self, builder: ISearchItemBuilder, recognition_output: dict) -> Optional[str]:
         builder_name = builder.__class__.__name__

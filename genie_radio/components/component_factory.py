@@ -6,7 +6,7 @@ from genie_common.tools import AioPoolExecutor, EmailSender
 from genie_common.utils import env_var_to_bool
 from genie_datastores.postgres.models import SpotifyStation
 from shazamio import Shazam
-from spotipyio import SpotifyClient
+from spotipyio import SpotifyClient, SpotifySession
 
 from genie_radio.components.search_item_builders_factory import SearchItemBuildersFactory
 from genie_radio.components.spotify_factory import SpotifyFactory
@@ -26,8 +26,13 @@ class ComponentFactory:
         self.spotify = spotify
         self.search_item_builder = search_item_builder
 
-    async def get_application_runner(self, client_session: ClientSession) -> ApplicationRunner:
-        playlists_manager = await self.get_playlists_manager(client_session)
+    async def get_application_runner(self,
+                                     client_session: ClientSession,
+                                     spotify_session: SpotifySession) -> ApplicationRunner:
+        playlists_manager = await self.get_playlists_manager(
+            client_session=client_session,
+            spotify_session=spotify_session
+        )
         return ApplicationRunner(
             email_sender=self.get_email_sender(),
             playlists_manager=playlists_manager
@@ -40,9 +45,9 @@ class ComponentFactory:
             password=os.environ["EMAIL_PASSWORD"]
         )
 
-    async def get_playlists_manager(self, client_session: ClientSession) -> PlaylistsManager:
-        session_creator = self.spotify.get_spotify_session_creator()
-        spotify_session = await session_creator.create()
+    async def get_playlists_manager(self,
+                                    client_session: ClientSession,
+                                    spotify_session: SpotifySession) -> PlaylistsManager:
         spotify_client = self.spotify.get_spotify_client(spotify_session)
         stations = self.get_stations(spotify_client)
 
@@ -52,7 +57,6 @@ class ComponentFactory:
             track_searcher=self.get_track_searcher(spotify_client),
             stations=stations,
             pool_executor=AioPoolExecutor(pool_size=len(stations), validate_results=False),
-            session_creator=session_creator
         )
 
     def get_track_searcher(self, spotify_client: SpotifyClient) -> TrackSearcher:

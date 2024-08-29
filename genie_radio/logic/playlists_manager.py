@@ -7,7 +7,6 @@ from genie_common.tools import logger, AioPoolExecutor
 from shazamio import Shazam
 
 from genie_radio.logic.radio_streamer import RadioStreamer
-from genie_radio.logic.spotify_session_creator import SpotifySessionCreator
 from genie_radio.logic.station_config import StationConfig
 from genie_radio.logic.track_searcher import TrackSearcher
 from genie_radio.utils import extract_shazam_artist, extract_shazam_track, extract_shazam_track_id
@@ -19,14 +18,12 @@ class PlaylistsManager:
                  shazam: Shazam,
                  track_searcher: TrackSearcher,
                  stations: List[StationConfig],
-                 pool_executor: AioPoolExecutor,
-                 session_creator: SpotifySessionCreator):
+                 pool_executor: AioPoolExecutor):
         self._radio_streamer = radio_streamer
         self._shazam = shazam
         self._track_searcher = track_searcher
         self._stations = stations
         self._pool_executor = pool_executor
-        self._session_creator = session_creator
 
     async def run_forever(self) -> None:
         while True:
@@ -43,8 +40,7 @@ class PlaylistsManager:
 
         if any(self._is_unauthorized(result) for result in results):
             logger.info("Encountered authorization issues. Refreshing Spotify session")
-            session = await self._session_creator.create()
-            self._track_searcher.refresh_session(session)
+            self._track_searcher.refresh_session()
 
         if all(isinstance(result, Exception) for result in results):
             raise RuntimeError("All requests ran into unknown exception")
