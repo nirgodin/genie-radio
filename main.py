@@ -11,8 +11,9 @@ async def run():
     factory = ComponentFactory()
 
     async with ClientSession() as client_session:
-        app_runner = await factory.get_application_runner(client_session)
-        await app_runner.run()
+        async with factory.spotify.create_spotify_session() as spotify_session:
+            app_runner = await factory.get_application_runner(client_session, spotify_session)
+            await app_runner.run()
 
 
 if __name__ == '__main__':
