@@ -63,7 +63,7 @@ class PlaylistUpdater:
             position=0
         )
         self._playlist_uris.insert(0, uri)
-        self._snapshot_id = response["snapshot_id"]
+        self._snapshot_id = response[0]
 
     async def _remove_oldest_uri(self):
         oldest_uri = self._playlist_uris.pop(-1)
